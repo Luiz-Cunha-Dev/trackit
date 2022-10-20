@@ -6,14 +6,18 @@ import {
   import "react-circular-progressbar/dist/styles.css";
   import { Link } from "react-router-dom";
 
+
+
 export default function Menu() {
+
+
     return (
         <EstiloMenu>
-            <Link to="/habitos">
+            <StyledLink to="/habitos">
             <span>Hábitos</span>
-            </Link>
+            </StyledLink>
             <div style={{ width: "91px" }}>
-            <CircularProgressbar
+            <StyledCircularProgressbar
                         value={75}
                         text={`Hoje`}
                         background
@@ -27,9 +31,9 @@ export default function Menu() {
                         })}
                     />
             </div>
-            <Link to="/historico">
+            <StyledLink to="/historico">
             <span>Histórico</span>
-            </Link>
+            </StyledLink>
         </EstiloMenu>
     )
 }
@@ -49,7 +53,6 @@ bottom: 0;
 width: 100%;
 padding-left: 36px;
 padding-right: 31px;
-padding-bottom: 40px;
 span{
 font-family: 'Lexend Deca';
 font-style: normal;
@@ -58,6 +61,13 @@ font-size: 17.976px;
 line-height: 22px;
 text-align: center;
 color: #52B6FF;
-margin-bottom: -40px;
 }
+`
+
+const StyledLink = styled(Link)`
+text-decoration: none;
+`
+
+const StyledCircularProgressbar = styled(CircularProgressbar)`
+margin-bottom: 40px;
 `

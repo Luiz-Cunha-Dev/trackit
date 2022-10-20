@@ -1,11 +1,16 @@
 import logo2 from "../img/TrackIt.png"
 import styled from "styled-components"
+import { useContext, useEffect } from "react";
+import { ContextoDeAutenticacao } from "../contexto/contexto"
 
 export default function Topo(){
+    const {usuario} = useContext(ContextoDeAutenticacao)
+    console.log(usuario)
+
     return(
         <EstiloTopo>
         <img src={logo2} alt="logo" />
-        <img src="https://yt3.ggpht.com/ytc/AMLnZu9tYPIG3bxki2LZz-NRrvHtLHRL0-wW95Cjgcr2=s900-c-k-c0x00ffffff-no-rj" alt="logo" />
+        <img src={usuario.data.image} alt="logo" />
         </EstiloTopo>
     )
 }
