@@ -8,8 +8,8 @@ import {
 
 
 
-export default function Menu() {
 
+export default function Menu() {
 
     return (
         <EstiloMenu>
@@ -17,7 +17,8 @@ export default function Menu() {
             <span>Hábitos</span>
             </StyledLink>
             <div style={{ width: "91px" }}>
-            <StyledCircularProgressbar
+                <StyledLink to="/hoje">
+                <StyledCircularProgressbar
                         value={75}
                         text={`Hoje`}
                         background
@@ -30,6 +31,7 @@ export default function Menu() {
                             trailColor: "transparent"
                         })}
                     />
+                </StyledLink>
             </div>
             <StyledLink to="/historico">
             <span>Histórico</span>

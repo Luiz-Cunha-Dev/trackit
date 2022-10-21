@@ -1,18 +1,86 @@
 import styled from "styled-components"
 import Topo from "./topo"
 import Menu from "./menu"
+import { useEffect, useContext, useState } from "react";
+import axios from "axios";
+import { ContextoDeAutenticacao } from "../contexto/contexto"
+import * as dayjs from 'dayjs'
+import * as isLeapYear from 'dayjs/plugin/isLeapYear'
+import certo from "../img/certo.png"
+import 'dayjs/locale/pt-br'
+dayjs.extend(isLeapYear) 
+dayjs.locale('pt-br')
+
+
+
 
 export default function Hoje() {
+
+    const { usuario } = useContext(ContextoDeAutenticacao)
+    const [habitosServidor, setHabitosServidor] = useState([]);
+    
+
+    useEffect(() => {
+        console.log(dayjs())
+        const config = {
+            headers: {
+                Authorization: `Bearer ${usuario.data.token}`
+            }
+        }
+        const url = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/today"
+        axios.get(url, config)
+            .then(res => {
+                console.log(res);
+                setHabitosServidor(res.data)
+            })
+            .catch(err => console.log(err))
+    }, []);
+
+    function HabitosDoDia(props){
+        return(
+            <Habito>
+                <h1>{props.name}</h1>
+                <span>Sequência atual: {props.currentSequence}</span>
+                <span>Seu recorde: {props.highestSequence}</span>
+                <button onClick={() => definirEstadoDoHabito(props.id, props.estado)} cor={props.cor} ><img src={certo} alt="certo" /></button>
+            </Habito>
+        )
+    }
+
+    function definirEstadoDoHabito(id, estado){
+        const config = {
+            headers: {
+                Authorization: `Bearer ${usuario.data.token}`
+            }
+        }
+        console.log(id)
+        console.log(estado)
+        if(estado === false){
+            const url = `https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/${id}/check`;
+            axios.post(url, config)
+                .then(res => console.log(res))
+                .catch(err => console.log(err))
+
+        }else{
+            const URL = `https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/${id}/uncheck`;
+            axios.post(URL, config)
+                .then(res => {
+                    console.log(res);
+                })
+                .catch(err => console.log(err))
+        }
+    }
+
     return (
         <>
             <Topo />
             <Fundo>
                 <TelaHoje>
                     <Titulo>
-                        <span>Segunda, 17/05</span>
-                        <button>+</button>
+                    <h1>Segunda, 17/05</h1>
+                        <span>Nenhum hábito concluído ainda</span>
                     </Titulo>
-                    <span>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span>
+                    {habitosServidor.map(h => <HabitosDoDia key={h.id} id={h.id} estado={h.done} cor={h.done !== false ? "#8FC549;" : "#EBEBEB"} name={h.name} currentSequence={h.currentSequence} highestSequence={h.highestSequence}/>)}
                 </TelaHoje>
             </Fundo>
             <Menu />
@@ -20,29 +88,58 @@ export default function Hoje() {
     )
 }
 
+const Habito = styled.div`
+width: 340px;
+height: 94px;
+background: #FFFFFF;
+border-radius: 5px;
+position: relative;
+display: flex;
+flex-direction: column;
+padding-left: 15px;
+margin-bottom: 10px;
+h1{
+font-family: 'Lexend Deca';
+font-style: normal;
+font-weight: 400;
+font-size: 19.976px;
+line-height: 25px;
+color: #666666;
+margin-top: 13px;
+margin-bottom: 7px;
+}
+span{
+    font-family: 'Lexend Deca';
+font-style: normal;
+font-weight: 400;
+font-size: 12.976px;
+line-height: 16px;
+color: #666666;
+}
+button{
+width: 69px;
+height: 69px;
+background: ${props => props.cor};
+border: 1px solid #E7E7E7;
+border-radius: 5px;
+position: absolute;
+top: 13px;
+right: 13px;
+}
+`
+
 const TelaHoje = styled.div`
 width: 100%;
 margin-top: 98px;
 padding-left: 17px;
 padding-right: 18px;
-span{
-width: 338px;
-font-family: 'Lexend Deca';
-font-style: normal;
-font-weight: 400;
-font-size: 17.976px;
-line-height: 22px;
-color: #666666;
-display: flex;
-}
 `
 
 const Titulo = styled.div`
 display: flex;
-justify-content: space-between;
-align-items: center;
+flex-direction: column;
 margin-bottom: 28px;
-span{
+h1{
 font-family: 'Lexend Deca';
 font-style: normal;
 font-weight: 400;
@@ -50,28 +147,22 @@ font-size: 22.976px;
 line-height: 29px;
 color: #126BA5;
 }
-button{
-width: 40px;
-height: 35px;
-background: #52B6FF;
-border-radius: 4.63636px;
-border: thin;
+span{
 font-family: 'Lexend Deca';
 font-style: normal;
 font-weight: 400;
-font-size: 26.976px;
-line-height: 34px;
-text-align: center;
-color: #FFFFFF;
+font-size: 17.976px;
+line-height: 22px;
+color: #BABABA;
 }
 `
 
 const Fundo = styled.div`
-z-index: 0;
 position: fixed;
 left: 0;
 top: 0;
 width: 100%;
 height: 100%;
 background: #E5E5E5;
+overflow: scroll;
 `
