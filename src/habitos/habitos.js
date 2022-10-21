@@ -2,15 +2,63 @@ import styled from "styled-components"
 import Topo from "./topo"
 import Menu from "./menu"
 import { useState } from "react"
+import axios from "axios"
+import { useContext } from "react"
+import { ContextoDeAutenticacao } from "../contexto/contexto"
 
 export default function Habitos() {
 
+    const {usuario} = useContext(ContextoDeAutenticacao)
+    console.log(usuario)
     const [adicionar, setAdicionar] = useState(false);
-    const [novoHabito, setNovoHabito] = useState();
+    const [dias, setDias] = useState([]);
+    const [nomeHabito, setNomeHabito] = useState("")
+    const coresBotao = ["#FFFFFF", "#DBDBDB", "#CFCFCF"]
 
     function criarHabito(){
-        
+        if(nomeHabito !== "" && dias.length !== 0){
+            let novoHabito = 
+            {
+                name: nomeHabito,
+                days: dias
+            };
+
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${usuario.data.token}`
+                }
+            }
+
+            console.log(nomeHabito);
+            const URL = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits"
+            axios.post(URL, novoHabito, config)
+                .then(res => {
+                    console.log(res)
+                    setAdicionar(false)
+                })
+                .catch(err => console.log(err))
+        }
+
     }
+
+    function selecionarDias(numero){
+        let listaDias = [];
+        if(dias.includes(numero)){
+            for(let i = 0; i < dias.length; i++){
+                if(dias[i] !== numero){
+                    listaDias.push(dias[i])
+                }
+            }
+            setDias(listaDias)
+        }else{
+            for(let i = 0; i < dias.length; i++){
+                    listaDias.push(dias[i])
+            }
+            listaDias.push(numero)
+            setDias(listaDias)
+        }
+    }
+
 
 
     return (
@@ -27,19 +75,19 @@ export default function Habitos() {
                         :
                         <>
                         <NovoHabito>
-                            <input type="text" placeholder="nome do hábito" />
-                            <Dias>
-                                <button>D</button>
-                                <button>S</button>
-                                <button>T</button>
-                                <button>Q</button>
-                                <button>Q</button>
-                                <button>S</button>
-                                <button>S</button>
-                            </Dias>
+                            <input type="text" placeholder="nome do hábito" value={nomeHabito} onChange={e => setNomeHabito(e.target.value)} />
+                            <div >
+                                <Dia onClick={() => selecionarDias(1)} corFundo={dias.includes(1) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(1) ? coresBotao[0] : coresBotao[1]}>D</Dia>
+                                <Dia onClick={() => selecionarDias(2)} corFundo={dias.includes(2) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(2) ? coresBotao[0] : coresBotao[1]}>S</Dia>
+                                <Dia onClick={() => selecionarDias(3)} corFundo={dias.includes(3) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(3) ? coresBotao[0] : coresBotao[1]}>T</Dia>
+                                <Dia onClick={() => selecionarDias(4)} corFundo={dias.includes(4) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(4) ? coresBotao[0] : coresBotao[1]}>Q</Dia>
+                                <Dia onClick={() => selecionarDias(5)} corFundo={dias.includes(5) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(5) ? coresBotao[0] : coresBotao[1]}>Q</Dia>
+                                <Dia onClick={() => selecionarDias(6)} corFundo={dias.includes(6) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(6) ? coresBotao[0] : coresBotao[1]}>S</Dia>
+                                <Dia onClick={() => selecionarDias(7)} corFundo={dias.includes(7) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(7) ? coresBotao[0] : coresBotao[1]}>S</Dia>
+                            </div>
                             <span>
                                 <p onClick={() => setAdicionar(false)}>Cancelar</p>
-                                <button>Salvar</button>
+                                <button onClick={criarHabito} >Salvar</button>
                             </span>
                         </NovoHabito>
                         <span>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span>
@@ -110,11 +158,10 @@ color: #DBDBDB;
 }
 `
 
-const Dias = styled.div`
-button{
+const Dia = styled.button`
 width: 30px;
 height: 30px;
-background: #FFFFFF;
+background: ${props => props.corFundo};
 border: 1px solid #D5D5D5;
 border-radius: 5px;
 font-family: 'Lexend Deca';
@@ -122,9 +169,9 @@ font-style: normal;
 font-weight: 400;
 font-size: 19.976px;
 line-height: 25px;
-color: #DBDBDB;
+color: ${props => props.corLetra};
 margin-right: 4px;
-}
+
 `
 
 const TelaHabitos = styled.div`
