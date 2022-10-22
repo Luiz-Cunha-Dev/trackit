@@ -16,17 +16,19 @@ dayjs.locale('pt-br')
 
 export default function Hoje() {
 
-    const { usuario } = useContext(ContextoDeAutenticacao)
+    const { usuario } = useContext(ContextoDeAutenticacao);
+    const token = usuario.data.token;
     const [habitosServidor, setHabitosServidor] = useState([]);
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    };
+    const [porcentagem, setPocentagem] = useState(0)
     
 
     useEffect(() => {
         console.log(dayjs())
-        const config = {
-            headers: {
-                Authorization: `Bearer ${usuario.data.token}`
-            }
-        }
         const url = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/today"
         axios.get(url, config)
             .then(res => {
@@ -36,39 +38,73 @@ export default function Hoje() {
             .catch(err => console.log(err))
     }, []);
 
+    function atualizarHabitos(){
+
+        console.log(dayjs())
+        const url = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/today"
+        axios.get(url, config)
+            .then(res => {
+                console.log(res);
+                setHabitosServidor(res.data);
+                console.log(habitosServidor);
+                atualizarPorcentagem()
+            })
+            .catch(err => {console.log(err)
+                atualizarPorcentagem()
+            })
+            atualizarPorcentagem()
+    }
+
+    function atualizarPorcentagem(){
+
+        let numeroDeHabitosDoDia = habitosServidor.length;
+        let numeroDeHabitosConcluidos = 0;
+
+        for(let i = 0; i < numeroDeHabitosDoDia; i++){
+            if(habitosServidor[i].done === true){
+                numeroDeHabitosConcluidos++
+            }
+        }
+
+
+        console.log(numeroDeHabitosDoDia);
+        console.log(numeroDeHabitosConcluidos);
+
+        let porcentagemConcluida = (numeroDeHabitosConcluidos/numeroDeHabitosDoDia)*100;
+        setPocentagem(porcentagemConcluida);
+    }
+
     function HabitosDoDia(props){
         return(
-            <Habito>
+            <Habito cor={props.cor}>
                 <h1>{props.name}</h1>
                 <span>Sequência atual: {props.currentSequence}</span>
                 <span>Seu recorde: {props.highestSequence}</span>
-                <button onClick={() => definirEstadoDoHabito(props.id, props.estado)} cor={props.cor} ><img src={certo} alt="certo" /></button>
+                <button onClick={() => definirEstadoDoHabito(props.id, props.estado)}  ><img src={certo} alt="certo" /></button>
             </Habito>
         )
     }
 
     function definirEstadoDoHabito(id, estado){
-        const config = {
-            headers: {
-                Authorization: `Bearer ${usuario.data.token}`
-            }
-        }
-        console.log(id)
-        console.log(estado)
-        if(estado === false){
+
+        if(estado !== true){
             const url = `https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/${id}/check`;
-            axios.post(url, config)
-                .then(res => console.log(res))
+            axios.post(url, null, config)
+                .then(res => {console.log(res)
+                    atualizarHabitos()
+                })
                 .catch(err => console.log(err))
 
         }else{
             const URL = `https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/${id}/uncheck`;
-            axios.post(URL, config)
+            axios.post(URL, null, config)
                 .then(res => {
                     console.log(res);
+                    atualizarHabitos()
                 })
                 .catch(err => console.log(err))
         }
+
     }
 
     return (
@@ -78,7 +114,7 @@ export default function Hoje() {
                 <TelaHoje>
                     <Titulo>
                     <h1>Segunda, 17/05</h1>
-                        <span>Nenhum hábito concluído ainda</span>
+                        <span>{habitosServidor !== [] ? `${porcentagem}% dos hábitos concluídos` : "Nenhum hábito concluído ainda"}</span>
                     </Titulo>
                     {habitosServidor.map(h => <HabitosDoDia key={h.id} id={h.id} estado={h.done} cor={h.done !== false ? "#8FC549;" : "#EBEBEB"} name={h.name} currentSequence={h.currentSequence} highestSequence={h.highestSequence}/>)}
                 </TelaHoje>
@@ -158,11 +194,9 @@ color: #BABABA;
 `
 
 const Fundo = styled.div`
-position: fixed;
-left: 0;
-top: 0;
 width: 100%;
 height: 100%;
+margin-bottom: 70px;
 background: #E5E5E5;
 overflow: scroll;
 `

@@ -1,7 +1,7 @@
 import { useState, createContext} from "react";
 
 
-export const ContextoDeAutenticacao = createContext({})
+export const ContextoDeAutenticacao = createContext({});
 
 function ProvedorDeAutentificacao({children}){
 
