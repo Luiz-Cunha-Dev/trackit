@@ -1,8 +1,15 @@
 import styled from "styled-components"
 import Topo from "./topo"
 import Menu from "./menu"
+import { useContext, useEffect, useState } from "react"
+import { ContextoDeAutenticacao } from "../contexto/contexto"
 
 export default function Historico() {
+
+    const { usuario, porcentagem } = useContext(ContextoDeAutenticacao)
+
+    
+
     return (
         <>
             <Topo />
@@ -15,7 +22,7 @@ export default function Historico() {
                     <span>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span>
                 </TelaHistorico>
             </Fundo>
-            <Menu />
+            <Menu porcentagem={porcentagem} />
         </>
     )
 }

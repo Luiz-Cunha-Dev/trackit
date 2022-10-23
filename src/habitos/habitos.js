@@ -10,12 +10,11 @@ const coresBotao = ["#FFFFFF", "#DBDBDB", "#CFCFCF"]
 
 export default function Habitos() {
 
-    const { usuario } = useContext(ContextoDeAutenticacao)
-    console.log(usuario)
+    const { usuario, setPocentagem, porcentagem, setHabitosServidor, habitosServidor } = useContext(ContextoDeAutenticacao);
     const [adicionar, setAdicionar] = useState(false);
     const [dias, setDias] = useState([]);
     const [nomeHabito, setNomeHabito] = useState("")
-    const [habitosServidor, setHabitosServidor] = useState([]);
+    const [todosOsHabitos, setTodosOsHabitos] = useState([]);
 
     useEffect(() => {
         const config = {
@@ -26,11 +25,33 @@ export default function Habitos() {
         const url = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits"
         axios.get(url, config)
             .then(res => {
-                console.log(res);
-                setHabitosServidor(res.data)
+                setTodosOsHabitos(res.data)
             })
             .catch(err => console.log(err))
+
+            const URL = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/today"
+            axios.get(URL, config)
+                .then(res => {
+                    setHabitosServidor(res.data)
+                })
+                .catch(err => console.log(err))
+
     }, []);
+
+    useEffect(() => {
+        let numeroDeHabitosDoDia = habitosServidor.length;
+        let numeroDeHabitosConcluidos = 0;
+
+        for(let i = 0; i < numeroDeHabitosDoDia; i++){
+            if(habitosServidor[i].done === true){
+                numeroDeHabitosConcluidos++
+            }
+        }
+
+        let porcentagemConcluida = (numeroDeHabitosConcluidos/numeroDeHabitosDoDia)*100;
+        porcentagemConcluida = Math.round(porcentagemConcluida)
+        setPocentagem(porcentagemConcluida);
+    }, [habitosServidor]);
 
     function criarHabito() {
         if (nomeHabito !== "" && dias.length !== 0) {
@@ -89,7 +110,7 @@ export default function Habitos() {
         axios.get(url, config)
             .then(res => {
                 console.log(res);
-                setHabitosServidor(res.data)
+                setTodosOsHabitos(res.data)
             })
             .catch(err => console.log(err))
     }
@@ -118,7 +139,7 @@ export default function Habitos() {
             <HabitoAdicionado>
                 <h1>{props.name}</h1>
                 <div>
-                    <Dia corFundo={props.days.includes(7) ? coresBotao[2] : coresBotao[0]} corLetra={props.days.includes(7) ? coresBotao[0] : coresBotao[1]}>D</Dia>
+                    <Dia corFundo={props.days.includes(0) ? coresBotao[2] : coresBotao[0]} corLetra={props.days.includes(0) ? coresBotao[0] : coresBotao[1]}>D</Dia>
                     <Dia corFundo={props.days.includes(1) ? coresBotao[2] : coresBotao[0]} corLetra={props.days.includes(1) ? coresBotao[0] : coresBotao[1]}>S</Dia>
                     <Dia corFundo={props.days.includes(2) ? coresBotao[2] : coresBotao[0]} corLetra={props.days.includes(2) ? coresBotao[0] : coresBotao[1]}>T</Dia>
                     <Dia corFundo={props.days.includes(3) ? coresBotao[2] : coresBotao[0]} corLetra={props.days.includes(3) ? coresBotao[0] : coresBotao[1]}>Q</Dia>
@@ -142,14 +163,14 @@ export default function Habitos() {
                     </Titulo>
                     {adicionar !== true ? 
                     <>
-                        {habitosServidor.length === 0 ? <span>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span> : ""}
+                        {todosOsHabitos.length === 0 ? <span>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span> : ""}
                     </>
                     :
                     <>
                         <NovoHabito>
                             <input type="text" placeholder="nome do hábito" value={nomeHabito} onChange={e => setNomeHabito(e.target.value)} />
                             <div >
-                                <Dia onClick={() => selecionarDias(7)} corFundo={dias.includes(7) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(7) ? coresBotao[0] : coresBotao[1]}>D</Dia>
+                                <Dia onClick={() => selecionarDias(0)} corFundo={dias.includes(0) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(0) ? coresBotao[0] : coresBotao[1]}>D</Dia>
                                 <Dia onClick={() => selecionarDias(1)} corFundo={dias.includes(1) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(1) ? coresBotao[0] : coresBotao[1]}>S</Dia>
                                 <Dia onClick={() => selecionarDias(2)} corFundo={dias.includes(2) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(2) ? coresBotao[0] : coresBotao[1]}>T</Dia>
                                 <Dia onClick={() => selecionarDias(3)} corFundo={dias.includes(3) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(3) ? coresBotao[0] : coresBotao[1]}>Q</Dia>
@@ -162,14 +183,14 @@ export default function Habitos() {
                                 <button onClick={criarHabito} >Salvar</button>
                             </span>
                         </NovoHabito>
-                        {habitosServidor.length === 0 ? <span>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span> : ""}
+                        {todosOsHabitos.length === 0 ? <span>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span> : ""}
                         </>
                     }
                     
-                    {habitosServidor.map(h => <HabitosAdicionados id={h.id} key={h.id} name={h.name} days={h.days} />)}
+                    {todosOsHabitos.map(h => <HabitosAdicionados id={h.id} key={h.id} name={h.name} days={h.days} />)}
                 </TelaHabitos>
             </Fundo>
-            <Menu />
+            <Menu porcentagem={porcentagem} />
         </>
     )
 }

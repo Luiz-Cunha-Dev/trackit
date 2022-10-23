@@ -5,7 +5,6 @@ import { ContextoDeAutenticacao } from "../contexto/contexto"
 
 export default function Topo(){
     const {usuario} = useContext(ContextoDeAutenticacao)
-    console.log(usuario)
 
     return(
         <EstiloTopo>

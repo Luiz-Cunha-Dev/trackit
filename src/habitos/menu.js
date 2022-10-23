@@ -9,7 +9,7 @@ import {
 
 
 
-export default function Menu() {
+export default function Menu(props) {
 
     return (
         <EstiloMenu>
@@ -19,7 +19,7 @@ export default function Menu() {
             <div style={{ width: "91px" }}>
                 <StyledLink to="/hoje">
                 <StyledCircularProgressbar
-                        value={75}
+                        value={props.porcentagem}
                         text={`Hoje`}
                         background
                         backgroundPadding={6}

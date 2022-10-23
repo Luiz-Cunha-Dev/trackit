@@ -4,39 +4,76 @@ import Menu from "./menu"
 import { useEffect, useContext, useState } from "react";
 import axios from "axios";
 import { ContextoDeAutenticacao } from "../contexto/contexto"
-import * as dayjs from 'dayjs'
-import * as isLeapYear from 'dayjs/plugin/isLeapYear'
+import dayjs from 'dayjs'
 import certo from "../img/certo.png"
-import 'dayjs/locale/pt-br'
-dayjs.extend(isLeapYear) 
-dayjs.locale('pt-br')
 
 
 
 
 export default function Hoje() {
 
-    const { usuario } = useContext(ContextoDeAutenticacao);
+    const { usuario, porcentagem, setPocentagem, habitosServidor, setHabitosServidor } = useContext(ContextoDeAutenticacao);
+    const datas = dayjs();
+    const [diaSemana, setDiaSemana] = useState();
+    const [diaMes, setDiaMes] = useState();
+    const [mes, setMes] = useState();
     const token = usuario.data.token;
-    const [habitosServidor, setHabitosServidor] = useState([]);
     const config = {
         headers: {
             Authorization: `Bearer ${token}`
         }
     };
-    const [porcentagem, setPocentagem] = useState(0)
+
     
 
-    useEffect(() => {
-        console.log(dayjs())
+    function diaDaSemana(){
+        if(datas.day() === 0){
+            return "Domingo"
+        }else if(datas.day() === 1){
+            return "Segunda"
+        }else if(datas.day() === 2){
+            return "Terça"
+        }else if(datas.day() === 3){
+            return "Quarta"
+        }else if(datas.day() === 4){
+            return "Quinta"
+        }else if(datas.day() === 5){
+            return "Sexta"
+        }else if(datas.day() === 6){
+            return "Sabado"
+        }
+    }
+
+    useEffect(() => { 
+        let valor = diaDaSemana
+        setDiaSemana(valor)
+        setDiaMes(datas.date());
+        setMes(datas.month() + 1);
+
+
+        
         const url = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/today"
         axios.get(url, config)
             .then(res => {
-                console.log(res);
                 setHabitosServidor(res.data)
             })
             .catch(err => console.log(err))
     }, []);
+
+    useEffect(() => {
+        let numeroDeHabitosDoDia = habitosServidor.length;
+        let numeroDeHabitosConcluidos = 0;
+
+        for(let i = 0; i < numeroDeHabitosDoDia; i++){
+            if(habitosServidor[i].done === true){
+                numeroDeHabitosConcluidos++
+            }
+        }
+
+        let porcentagemConcluida = (numeroDeHabitosConcluidos/numeroDeHabitosDoDia)*100;
+        porcentagemConcluida = Math.round(porcentagemConcluida)
+        setPocentagem(porcentagemConcluida);
+    }, [habitosServidor]);
 
     function atualizarHabitos(){
 
@@ -47,43 +84,12 @@ export default function Hoje() {
                 console.log(res);
                 setHabitosServidor(res.data);
                 console.log(habitosServidor);
-                atualizarPorcentagem()
             })
             .catch(err => {console.log(err)
-                atualizarPorcentagem()
             })
-            atualizarPorcentagem()
     }
 
-    function atualizarPorcentagem(){
 
-        let numeroDeHabitosDoDia = habitosServidor.length;
-        let numeroDeHabitosConcluidos = 0;
-
-        for(let i = 0; i < numeroDeHabitosDoDia; i++){
-            if(habitosServidor[i].done === true){
-                numeroDeHabitosConcluidos++
-            }
-        }
-
-
-        console.log(numeroDeHabitosDoDia);
-        console.log(numeroDeHabitosConcluidos);
-
-        let porcentagemConcluida = (numeroDeHabitosConcluidos/numeroDeHabitosDoDia)*100;
-        setPocentagem(porcentagemConcluida);
-    }
-
-    function HabitosDoDia(props){
-        return(
-            <Habito cor={props.cor}>
-                <h1>{props.name}</h1>
-                <span>Sequência atual: {props.currentSequence}</span>
-                <span>Seu recorde: {props.highestSequence}</span>
-                <button onClick={() => definirEstadoDoHabito(props.id, props.estado)}  ><img src={certo} alt="certo" /></button>
-            </Habito>
-        )
-    }
 
     function definirEstadoDoHabito(id, estado){
 
@@ -104,22 +110,33 @@ export default function Hoje() {
                 })
                 .catch(err => console.log(err))
         }
-
     }
+
+    function HabitosDoDia(props){
+        return(
+            <Habito cor={props.cor} corSequencia={props.corSequencia}>
+                <h1>{props.name}</h1>
+                <p>Sequência atual: <span>{props.currentSequence} dias</span></p>
+                <p>Seu recorde: <span>{props.highestSequence} dias</span></p>
+                <button onClick={() => definirEstadoDoHabito(props.id, props.estado)}  ><img src={certo} alt="certo" /></button>
+            </Habito>
+        )
+    }
+
 
     return (
         <>
             <Topo />
             <Fundo>
                 <TelaHoje>
-                    <Titulo>
-                    <h1>Segunda, 17/05</h1>
-                        <span>{habitosServidor !== [] ? `${porcentagem}% dos hábitos concluídos` : "Nenhum hábito concluído ainda"}</span>
+                    <Titulo cor={porcentagem !== 0 ? "#8FC549" : "#BABABA"}>
+                    <h1>{diaSemana}, {diaMes}/{mes}</h1>
+                        <span >{porcentagem !== 0 ? `${porcentagem}% dos hábitos concluídos` : "Nenhum hábito concluído ainda"}</span>
                     </Titulo>
-                    {habitosServidor.map(h => <HabitosDoDia key={h.id} id={h.id} estado={h.done} cor={h.done !== false ? "#8FC549;" : "#EBEBEB"} name={h.name} currentSequence={h.currentSequence} highestSequence={h.highestSequence}/>)}
+                    {habitosServidor.map(h => <HabitosDoDia key={h.id} id={h.id} estado={h.done} corSequencia={h.done !== false ? "#8FC549" : "#666666"} cor={h.done !== false ? "#8FC549" : "#EBEBEB"} name={h.name} currentSequence={h.currentSequence} highestSequence={h.highestSequence}/>)}
                 </TelaHoje>
             </Fundo>
-            <Menu />
+            <Menu porcentagem={porcentagem} />
         </>
     )
 }
@@ -144,13 +161,16 @@ color: #666666;
 margin-top: 13px;
 margin-bottom: 7px;
 }
-span{
-    font-family: 'Lexend Deca';
+p{
+font-family: 'Lexend Deca';
 font-style: normal;
 font-weight: 400;
 font-size: 12.976px;
 line-height: 16px;
 color: #666666;
+}
+span{
+    color: ${props => props.corSequencia};
 }
 button{
 width: 69px;
@@ -189,7 +209,7 @@ font-style: normal;
 font-weight: 400;
 font-size: 17.976px;
 line-height: 22px;
-color: #BABABA;
+color: ${props => props.cor}
 }
 `
 

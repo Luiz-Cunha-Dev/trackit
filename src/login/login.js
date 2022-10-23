@@ -20,11 +20,9 @@ export default function Login() {
                 email: email,
                 password: senha
             }
-            console.log(informacoes);
             const URL = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/auth/login"
             axios.post(URL, informacoes)
                 .then(res => {setUsuario(res)
-                     console.log(res)
                     navigate("/habitos")})
                 .catch(err => console.log(err))
         }
