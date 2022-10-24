@@ -9,9 +9,7 @@ import certo from "../img/certo.png"
 
 
 
-
 export default function Hoje() {
-
     const { usuario, porcentagem, setPocentagem, habitosServidor, setHabitosServidor } = useContext(ContextoDeAutenticacao);
     const datas = dayjs();
     const [diaSemana, setDiaSemana] = useState();
@@ -192,6 +190,7 @@ b{
 
 const TelaHoje = styled.div`
 width: 100%;
+height: 100% + 10px;
 margin-top: 98px;
 padding-left: 17px;
 padding-right: 18px;
@@ -221,7 +220,7 @@ color: ${props => props.cor}
 
 const Fundo = styled.div`
 width: 100%;
-height: 100%;
+height: 100vh;
 margin-bottom: 70px;
 background: #E5E5E5;
 overflow: scroll;

@@ -336,11 +336,12 @@ margin-right: 4px;
 
 const TelaHabitos = styled.div`
 width: 100%;
-height: 100%;
+height: 100% + 10px;
 padding-left: 17px;
 padding-right: 18px;
 padding-top: 18px;
 padding-bottom: 35px;
+background: #E5E5E5;
 span{
 width: 338px;
 font-family: 'Lexend Deca';
@@ -389,7 +390,7 @@ padding-bottom: 5px;
 
 const Fundo = styled.div`
 width: 100%;
-height: 100%;
+height: 100vh;
 background: #E5E5E5;
 margin-top: 70px;
 margin-bottom: 70px;

@@ -39,6 +39,8 @@ export default function Login() {
             const URL = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/auth/login"
             axios.post(URL, informacoes)
                 .then(res => {setUsuario(res)
+                    localStorage.removeItem("usuarioLocal");
+                    localStorage.setItem("usuarioLocal", JSON.stringify(res));
                     navigate("/hoje")})
                 .catch(err => {
                     alert(err.response.data.message)
