@@ -9,7 +9,7 @@ export default function Topo(){
     return(
         <EstiloTopo>
         <img src={logo2} alt="logo" />
-        <img src={usuario.data.image} alt="logo" />
+        <img data-identifier="avatar" src={usuario.data.image} alt="logo" />
         </EstiloTopo>
     )
 }

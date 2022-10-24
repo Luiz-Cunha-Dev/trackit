@@ -12,9 +12,25 @@ export default function Login() {
     const {setUsuario} = useContext(ContextoDeAutenticacao)
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
+    const [botaoLogar, setBotaoLogar] = useState("Entar")
+    const [fundoInput, setFundoInput] = useState("#FFFFFF")
+    const [cor, setCor] = useState("#666666")
 
     function logar() {
         if (email !== "" && senha !== "") {
+            setBotaoLogar(<ThreeDots
+                height="80"
+                width="80"
+                radius="9"
+                color="white"
+                ariaLabel="three-dots-loading"
+                wrapperStyle={{}}
+                wrapperClassName=""
+                visible={true}
+            />)
+            setFundoInput("#F2F2F2")
+            setCor("#AFAFAF")
+
             let informacoes =
             {
                 email: email,
@@ -23,8 +39,13 @@ export default function Login() {
             const URL = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/auth/login"
             axios.post(URL, informacoes)
                 .then(res => {setUsuario(res)
-                    navigate("/habitos")})
-                .catch(err => console.log(err))
+                    navigate("/hoje")})
+                .catch(err => {
+                    alert(err.response.data.message)
+                    setFundoInput("#FFFFFF")
+                    setCor("#666666")
+                    setBotaoLogar("Entrar")
+                })
         }
     }         
 
@@ -32,23 +53,11 @@ export default function Login() {
     return (
             <TelaLogin>
                 <img src={logo} alt="logo" />
-                <input type="email" placeholder="email" value={email} onChange={e => setEmail(e.target.value)} />
-                <input type="password" placeholder="senha" value={senha} onChange={e => setSenha(e.target.value)} />
-                    <button onClick={logar}>
-                        Entrar
-                        {/* <ThreeDots
-                            height="80"
-                            width="80"
-                            radius="9"
-                            color="white"
-                            ariaLabel="three-dots-loading"
-                            wrapperStyle={{}}
-                            wrapperClassName=""
-                            visible={true}
-                        /> */}
-                    </button>
+                <InputLogin data-identifier="input-email" cor={cor} corFundo={fundoInput} type="email" placeholder="email" value={email} onChange={e => setEmail(e.target.value)} />
+                <InputLogin data-identifier="input-password" cor={cor} corFundo={fundoInput} type="password" placeholder="senha" value={senha} onChange={e => setSenha(e.target.value)} />
+                    <button data-identifier="login-btn" onClick={logar}>{botaoLogar}</button>
                 <StyledLink to="/cadastro">
-                    <span>Não tem uma conta? Cadastre-se!</span>
+                    <span data-identifier="sign-up-action">Não tem uma conta? Cadastre-se!</span>
                 </StyledLink>
             </TelaLogin>
     )
@@ -62,22 +71,6 @@ justify-content: center;
 margin-top: 68px;
 img{
     margin-bottom: 32.6px;
-}
-input{
-width: 303px;
-height: 45px;
-background: #FFFFFF;
-border: 1px solid #D5D5D5;
-border-radius: 5px;
-margin-bottom: 6px;
-}
-input:-ms-input-placeholder{
-    font-family: 'Lexend Deca';
-font-style: normal;
-font-weight: 400;
-font-size: 19.976px;
-line-height: 25px;
-color: #DBDBDB;
 }
 button{
 width: 303px;
@@ -108,6 +101,31 @@ text-decoration-line: underline;
 color: #52B6FF;
 }
 `
+
+const InputLogin = styled.input`
+font-family: 'Lexend Deca';
+font-style: normal;
+font-weight: 400;
+font-size: 19.976px;
+line-height: 25px;
+width: 303px;
+height: 45px;
+border: 1px solid #D5D5D5;
+border-radius: 5px;
+margin-bottom: 6px;
+color: ${props => props.cor};
+background-color: ${props => props.corFundo};
+::placeholder{
+font-family: 'Lexend Deca';
+font-style: normal;
+font-weight: 400;
+font-size: 19.976px;
+line-height: 25px;
+color: #DBDBDB;
+background: ${props => props.corFundo};
+}
+`
+
 const StyledLink = styled(Link)`
 text-decoration: none;
 `

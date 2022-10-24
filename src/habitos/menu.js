@@ -14,7 +14,7 @@ export default function Menu(props) {
     return (
         <EstiloMenu>
             <StyledLink to="/habitos">
-            <span>Hábitos</span>
+            <span data-identifier="habit-page-action">Hábitos</span>
             </StyledLink>
             <div style={{ width: "91px" }}>
                 <StyledLink to="/hoje">
@@ -34,7 +34,7 @@ export default function Menu(props) {
                 </StyledLink>
             </div>
             <StyledLink to="/historico">
-            <span>Histórico</span>
+            <span data-identifier="historic-page-action">Histórico</span>
             </StyledLink>
         </EstiloMenu>
     )

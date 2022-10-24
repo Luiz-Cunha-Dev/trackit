@@ -8,7 +8,7 @@ export default function Historico() {
 
     const { usuario, porcentagem } = useContext(ContextoDeAutenticacao)
 
-    
+
 
     return (
         <>
@@ -17,9 +17,8 @@ export default function Historico() {
                 <TelaHistorico>
                     <Titulo>
                         <span>Histórico</span>
-                        <button>+</button>
                     </Titulo>
-                    <span>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span>
+                    <span>Em breve você poderá ver o histórico dos seus hábitos aqui!</span>
                 </TelaHistorico>
             </Fundo>
             <Menu porcentagem={porcentagem} />

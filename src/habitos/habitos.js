@@ -5,6 +5,7 @@ import axios from "axios"
 import { useContext, useEffect, useState } from "react"
 import { ContextoDeAutenticacao } from "../contexto/contexto"
 import lixeira from "../img/Vector.png"
+import { ThreeDots } from 'react-loader-spinner'
 
 const coresBotao = ["#FFFFFF", "#DBDBDB", "#CFCFCF"]
 
@@ -15,6 +16,9 @@ export default function Habitos() {
     const [dias, setDias] = useState([]);
     const [nomeHabito, setNomeHabito] = useState("")
     const [todosOsHabitos, setTodosOsHabitos] = useState([]);
+    const [botaoSalvar, setBotaoSalvar] = useState("Salvar")
+    const [fundoInput, setFundoInput] = useState("#FFFFFF")
+    const [cor, setCor] = useState("#666666")
 
     useEffect(() => {
         const config = {
@@ -29,32 +33,51 @@ export default function Habitos() {
             })
             .catch(err => console.log(err))
 
-            const URL = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/today"
-            axios.get(URL, config)
-                .then(res => {
-                    setHabitosServidor(res.data)
-                })
-                .catch(err => console.log(err))
+        const URL = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/today"
+        axios.get(URL, config)
+            .then(res => {
+                setHabitosServidor(res.data)
+            })
+            .catch(err => console.log(err))
 
-    }, []);
+    }, [adicionar]);
 
     useEffect(() => {
         let numeroDeHabitosDoDia = habitosServidor.length;
         let numeroDeHabitosConcluidos = 0;
 
-        for(let i = 0; i < numeroDeHabitosDoDia; i++){
-            if(habitosServidor[i].done === true){
+        for (let i = 0; i < numeroDeHabitosDoDia; i++) {
+            if (habitosServidor[i].done === true) {
                 numeroDeHabitosConcluidos++
             }
         }
 
-        let porcentagemConcluida = (numeroDeHabitosConcluidos/numeroDeHabitosDoDia)*100;
+        let porcentagemConcluida = (numeroDeHabitosConcluidos / numeroDeHabitosDoDia) * 100;
         porcentagemConcluida = Math.round(porcentagemConcluida)
         setPocentagem(porcentagemConcluida);
     }, [habitosServidor]);
 
     function criarHabito() {
         if (nomeHabito !== "" && dias.length !== 0) {
+
+            if(nomeHabito.length > 18){
+                alert("Nome do habito maior do que o permitido!")
+                return
+            }
+
+            setBotaoSalvar(<ThreeDots
+                height="40"
+                width="40"
+                radius="9"
+                color="white"
+                ariaLabel="three-dots-loading"
+                wrapperStyle={{}}
+                wrapperClassName=""
+                visible={true}
+            />)
+            setFundoInput("#F2F2F2")
+            setCor("#AFAFAF")
+
             let novoHabito =
             {
                 name: nomeHabito,
@@ -67,7 +90,6 @@ export default function Habitos() {
                 }
             }
 
-            console.log(nomeHabito);
             const URL = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits"
             axios.post(URL, novoHabito, config)
                 .then(res => {
@@ -75,9 +97,19 @@ export default function Habitos() {
                     setDias([])
                     setNomeHabito("")
                     atualizarHabitos();
+                    setBotaoSalvar("Salvar")
+                    setFundoInput("#FFFFFF")
+                    setCor("#666666")
                 })
-                .catch(err => console.log(err));
-
+                .catch(err => {
+                    alert(err.response.data.message)
+                    setDias([])
+                    setNomeHabito("")
+                    atualizarHabitos();
+                    setBotaoSalvar("Salvar")
+                    setFundoInput("#FFFFFF")
+                    setCor("#666666")
+                });
 
         }
     }
@@ -109,16 +141,14 @@ export default function Habitos() {
         const url = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits"
         axios.get(url, config)
             .then(res => {
-                console.log(res);
                 setTodosOsHabitos(res.data)
             })
             .catch(err => console.log(err))
     }
 
-    function deletarHabito(id){
+    function deletarHabito(id) {
         var resposta = window.confirm("Você realmente deseja deletar esse habito?");
-        if(resposta === true){
-            console.log(id);
+        if (resposta === true) {
             const config = {
                 headers: {
                     Authorization: `Bearer ${usuario.data.token}`
@@ -127,7 +157,6 @@ export default function Habitos() {
             const url = `https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/${id}`
             axios.delete(url, config)
                 .then(res => {
-                    console.log(res);
                     atualizarHabitos()
                 })
                 .catch(err => console.log(err))
@@ -137,7 +166,7 @@ export default function Habitos() {
     function HabitosAdicionados(props) {
         return (
             <HabitoAdicionado>
-                <h1>{props.name}</h1>
+                <h1 data-identifier="habit-name">{props.name}</h1>
                 <div>
                     <Dia corFundo={props.days.includes(0) ? coresBotao[2] : coresBotao[0]} corLetra={props.days.includes(0) ? coresBotao[0] : coresBotao[1]}>D</Dia>
                     <Dia corFundo={props.days.includes(1) ? coresBotao[2] : coresBotao[0]} corLetra={props.days.includes(1) ? coresBotao[0] : coresBotao[1]}>S</Dia>
@@ -147,51 +176,49 @@ export default function Habitos() {
                     <Dia corFundo={props.days.includes(5) ? coresBotao[2] : coresBotao[0]} corLetra={props.days.includes(5) ? coresBotao[0] : coresBotao[1]}>S</Dia>
                     <Dia corFundo={props.days.includes(6) ? coresBotao[2] : coresBotao[0]} corLetra={props.days.includes(6) ? coresBotao[0] : coresBotao[1]}>S</Dia>
                 </div>
-                <img onClick={() => deletarHabito(props.id)} src={lixeira} alt="lixeira" />
+                <img data-identifier="delete-habit-btn" onClick={() => deletarHabito(props.id)} src={lixeira} alt="lixeira" />
             </HabitoAdicionado>
         )
     }
 
     return (
-        <>
-            <Topo />
             <Fundo>
+                <Topo />
                 <TelaHabitos>
                     <Titulo>
                         <span>Meus hábitos</span>
-                        <button onClick={() => setAdicionar(true)}>+</button>
+                        <button data-identifier="create-habit-btn" onClick={() => setAdicionar(true)}>+</button>
                     </Titulo>
-                    {adicionar !== true ? 
-                    <>
-                        {todosOsHabitos.length === 0 ? <span>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span> : ""}
-                    </>
-                    :
-                    <>
-                        <NovoHabito>
-                            <input type="text" placeholder="nome do hábito" value={nomeHabito} onChange={e => setNomeHabito(e.target.value)} />
-                            <div >
-                                <Dia onClick={() => selecionarDias(0)} corFundo={dias.includes(0) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(0) ? coresBotao[0] : coresBotao[1]}>D</Dia>
-                                <Dia onClick={() => selecionarDias(1)} corFundo={dias.includes(1) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(1) ? coresBotao[0] : coresBotao[1]}>S</Dia>
-                                <Dia onClick={() => selecionarDias(2)} corFundo={dias.includes(2) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(2) ? coresBotao[0] : coresBotao[1]}>T</Dia>
-                                <Dia onClick={() => selecionarDias(3)} corFundo={dias.includes(3) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(3) ? coresBotao[0] : coresBotao[1]}>Q</Dia>
-                                <Dia onClick={() => selecionarDias(4)} corFundo={dias.includes(4) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(4) ? coresBotao[0] : coresBotao[1]}>Q</Dia>
-                                <Dia onClick={() => selecionarDias(5)} corFundo={dias.includes(5) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(5) ? coresBotao[0] : coresBotao[1]}>S</Dia>
-                                <Dia onClick={() => selecionarDias(6)} corFundo={dias.includes(6) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(6) ? coresBotao[0] : coresBotao[1]}>S</Dia>
-                            </div>
-                            <span>
-                                <p onClick={() => setAdicionar(false)}>Cancelar</p>
-                                <button onClick={criarHabito} >Salvar</button>
-                            </span>
-                        </NovoHabito>
-                        {todosOsHabitos.length === 0 ? <span>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span> : ""}
+                    {adicionar !== true ?
+                        <>
+                            {todosOsHabitos.length === 0 ? <span data-identifier="no-habit-message">Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span> : ""}
+                        </>
+                        :
+                        <>
+                            <NovoHabito>
+                                <InputLogin data-identifier="input-habit-name" cor={cor} corFundo={fundoInput} type="text" placeholder="nome do hábito" value={nomeHabito} onChange={e => setNomeHabito(e.target.value)} />
+                                <div >
+                                    <Dia data-identifier="week-day-btn" onClick={() => selecionarDias(0)} corFundo={dias.includes(0) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(0) ? coresBotao[0] : coresBotao[1]}>D</Dia>
+                                    <Dia data-identifier="week-day-btn" onClick={() => selecionarDias(1)} corFundo={dias.includes(1) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(1) ? coresBotao[0] : coresBotao[1]}>S</Dia>
+                                    <Dia data-identifier="week-day-btn" onClick={() => selecionarDias(2)} corFundo={dias.includes(2) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(2) ? coresBotao[0] : coresBotao[1]}>T</Dia>
+                                    <Dia data-identifier="week-day-btn" onClick={() => selecionarDias(3)} corFundo={dias.includes(3) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(3) ? coresBotao[0] : coresBotao[1]}>Q</Dia>
+                                    <Dia data-identifier="week-day-btn" onClick={() => selecionarDias(4)} corFundo={dias.includes(4) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(4) ? coresBotao[0] : coresBotao[1]}>Q</Dia>
+                                    <Dia data-identifier="week-day-btn" onClick={() => selecionarDias(5)} corFundo={dias.includes(5) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(5) ? coresBotao[0] : coresBotao[1]}>S</Dia>
+                                    <Dia data-identifier="week-day-btn" onClick={() => selecionarDias(6)} corFundo={dias.includes(6) ? coresBotao[2] : coresBotao[0]} corLetra={dias.includes(6) ? coresBotao[0] : coresBotao[1]}>S</Dia>
+                                </div>
+                                <span>
+                                    <p data-identifier="cancel-habit-create-btn" onClick={() => setAdicionar(false)}>Cancelar</p>
+                                    <button data-identifier="save-habit-create-btn" onClick={criarHabito} >{botaoSalvar}</button>
+                                </span>
+                            </NovoHabito>
+                            {todosOsHabitos.length === 0 ? <span data-identifier="no-habit-message">Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</span> : ""}
                         </>
                     }
-                    
+
                     {todosOsHabitos.map(h => <HabitosAdicionados id={h.id} key={h.id} name={h.name} days={h.days} />)}
                 </TelaHabitos>
+                <Menu porcentagem={porcentagem} />
             </Fundo>
-            <Menu porcentagem={porcentagem} />
-        </>
     )
 }
 
@@ -261,24 +288,33 @@ font-size: 16px;
 line-height: 20px;
 color: #FFFFFF;
 margin-right: 30px;
+display: flex;
+align-items: center;
+justify-content: center;
 }
 }
-input{
-width: 303px;
-height: 45px;
-background: #FFFFFF;
-border: 1px solid #D5D5D5;
-border-radius: 5px;
+`
+const InputLogin = styled.input`
 font-family: 'Lexend Deca';
 font-style: normal;
 font-weight: 400;
-font-size: 20px;
+font-size: 19.976px;
 line-height: 25px;
-margin-bottom: 10px;
-color: #666666;
-:placeholder-shown{
+width: 303px;
+height: 45px;
+border: 1px solid #D5D5D5;
+border-radius: 5px;
+margin-bottom: 6px;
+color: ${props => props.cor};
+background-color: ${props => props.corFundo};
+::placeholder{
+font-family: 'Lexend Deca';
+font-style: normal;
+font-weight: 400;
+font-size: 19.976px;
+line-height: 25px;
 color: #DBDBDB;
-}
+background: ${props => props.corFundo};
 }
 `
 

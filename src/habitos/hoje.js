@@ -64,6 +64,7 @@ export default function Hoje() {
         let numeroDeHabitosDoDia = habitosServidor.length;
         let numeroDeHabitosConcluidos = 0;
 
+
         for(let i = 0; i < numeroDeHabitosDoDia; i++){
             if(habitosServidor[i].done === true){
                 numeroDeHabitosConcluidos++
@@ -72,31 +73,33 @@ export default function Hoje() {
 
         let porcentagemConcluida = (numeroDeHabitosConcluidos/numeroDeHabitosDoDia)*100;
         porcentagemConcluida = Math.round(porcentagemConcluida)
-        setPocentagem(porcentagemConcluida);
+
+
+        if(isNaN(porcentagemConcluida)){
+            setPocentagem(0);
+        }else{
+            setPocentagem(porcentagemConcluida);
+        }
+
     }, [habitosServidor]);
 
     function atualizarHabitos(){
 
-        console.log(dayjs())
         const url = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/today"
         axios.get(url, config)
             .then(res => {
-                console.log(res);
                 setHabitosServidor(res.data);
-                console.log(habitosServidor);
             })
             .catch(err => {console.log(err)
             })
     }
-
-
 
     function definirEstadoDoHabito(id, estado){
 
         if(estado !== true){
             const url = `https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/${id}/check`;
             axios.post(url, null, config)
-                .then(res => {console.log(res)
+                .then(res => {
                     atualizarHabitos()
                 })
                 .catch(err => console.log(err))
@@ -105,7 +108,6 @@ export default function Hoje() {
             const URL = `https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/${id}/uncheck`;
             axios.post(URL, null, config)
                 .then(res => {
-                    console.log(res);
                     atualizarHabitos()
                 })
                 .catch(err => console.log(err))
@@ -114,11 +116,11 @@ export default function Hoje() {
 
     function HabitosDoDia(props){
         return(
-            <Habito cor={props.cor} corSequencia={props.corSequencia}>
+            <Habito data-identifier="today-infos" cor={props.cor} corSequenciaAtual={props.corSequenciaAtual} corRecorde={props.corRecorde}>
                 <h1>{props.name}</h1>
                 <p>Sequência atual: <span>{props.currentSequence} dias</span></p>
-                <p>Seu recorde: <span>{props.highestSequence} dias</span></p>
-                <button onClick={() => definirEstadoDoHabito(props.id, props.estado)}  ><img src={certo} alt="certo" /></button>
+                <p>Seu recorde: <b>{props.highestSequence} dias</b></p>
+                <button data-identifier="done-habit-btn" onClick={() => definirEstadoDoHabito(props.id, props.estado)}  ><img src={certo} alt="certo" /></button>
             </Habito>
         )
     }
@@ -130,10 +132,10 @@ export default function Hoje() {
             <Fundo>
                 <TelaHoje>
                     <Titulo cor={porcentagem !== 0 ? "#8FC549" : "#BABABA"}>
-                    <h1>{diaSemana}, {diaMes}/{mes}</h1>
-                        <span >{porcentagem !== 0 ? `${porcentagem}% dos hábitos concluídos` : "Nenhum hábito concluído ainda"}</span>
+                    <h1 data-identifier="today-infos">{diaSemana}, {diaMes}/{mes}</h1>
+                        <span data-identifier="today-infos">{porcentagem !== 0 ? `${porcentagem}% dos hábitos concluídos` : "Nenhum hábito concluído ainda"}</span>
                     </Titulo>
-                    {habitosServidor.map(h => <HabitosDoDia key={h.id} id={h.id} estado={h.done} corSequencia={h.done !== false ? "#8FC549" : "#666666"} cor={h.done !== false ? "#8FC549" : "#EBEBEB"} name={h.name} currentSequence={h.currentSequence} highestSequence={h.highestSequence}/>)}
+                    {habitosServidor.map(h => <HabitosDoDia key={h.id} id={h.id} estado={h.done} corRecorde={h.currentSequence === h.highestSequence && h.done !== false ? "#8FC549" : ""} corSequenciaAtual={h.done !== false ? "#8FC549" : "#666666"} cor={h.done !== false ? "#8FC549" : "#EBEBEB"} name={h.name} currentSequence={h.currentSequence} highestSequence={h.highestSequence}/>)}
                 </TelaHoje>
             </Fundo>
             <Menu porcentagem={porcentagem} />
@@ -170,7 +172,7 @@ line-height: 16px;
 color: #666666;
 }
 span{
-    color: ${props => props.corSequencia};
+    color: ${props => props.corSequenciaAtual};
 }
 button{
 width: 69px;
@@ -181,6 +183,10 @@ border-radius: 5px;
 position: absolute;
 top: 13px;
 right: 13px;
+}
+b{
+    display: inline;
+    color: ${props => props.corRecorde};
 }
 `
 
