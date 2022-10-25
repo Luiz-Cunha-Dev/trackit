@@ -12,7 +12,7 @@ export default function Login() {
     const {setUsuario} = useContext(ContextoDeAutenticacao)
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
-    const [botaoLogar, setBotaoLogar] = useState("Entar")
+    const [botaoLogar, setBotaoLogar] = useState("Entrar")
     const [fundoInput, setFundoInput] = useState("#FFFFFF")
     const [cor, setCor] = useState("#666666")
 
